@@ -88,9 +88,9 @@ public class StaxParser {
             StaxParser ms = new StaxParser();
 
             XMLEventReader reader = XMLInputFactory.newInstance().createXMLEventReader(new
-                    java.io.FileInputStream("/home/suren/Projects/ISO/pain.001.001.02.xml"));
+                    java.io.FileInputStream("/Users/suren/IdeaProjects/StAX_ISO/Resources/pain.001.001.02_S.xml"));
             writer = XMLOutputFactory.newInstance().createXMLEventWriter(
-                    new FileWriter("/home/suren/Projects/ISO/out1.xml"));
+                    new FileWriter("/Users/suren/IdeaProjects/StAX_ISO/Resources/out1.xml"));
 
             while(reader.hasNext()){
                 XMLEvent event = (XMLEvent)reader.next();
@@ -122,7 +122,8 @@ public class StaxParser {
                 if(isHeaderOpen) {
                     System.out.println(formXPath(arrayList) + "-" + getEventTypeString(event.getEventType()));
                     writer.add(event);
-                } else if(isBatchStart){
+                }
+                if(isBatchStart){
                     batchStartArrayList.add(event);
                     //System.out.println("H not open: "+event.toString());
                 }
@@ -136,7 +137,7 @@ public class StaxParser {
                         String catgryPurpCode = reader.peek().asCharacters().getData();
                         if(catgryPurpCode.equalsIgnoreCase("CCRD")){
                             isSUAbatch = true;
-                            isBatchStart = false;
+                            //isBatchStart = false;
                          //  writer.add(event);
                             for (int i = 0; i < batchStartArrayList.size(); i++) {
                                 ////System.out.println(batchStartArrayList.get(i));
