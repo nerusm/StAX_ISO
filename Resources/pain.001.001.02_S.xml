@@ -5,7 +5,7 @@
 			<MsgId>ABC/060928/CCT001</MsgId>
 		</GrpHdr>
 		<PmtInf>
-			<PmtMtd>TRF_1</PmtMtd>
+			<PmtMtd>CCRD</PmtMtd>
 			<ReqdExctnDt>2006-09-29</ReqdExctnDt>
 		</PmtInf>
 		</pain.001.001.02>

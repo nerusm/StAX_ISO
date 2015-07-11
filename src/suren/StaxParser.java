@@ -78,7 +78,8 @@ public class StaxParser {
         boolean isBatchStart = false;
         boolean isSUAbatch = false;
         String BATCH_START_ID = "/Document/pain.001.001.02/PmtInf";
-        String SUA_IDENTIFIER_xPATH = "/Document/pain.001.001.02/PmtInf/Dbtr/Nm";
+        String SUA_IDENTIFIER_xPATH = "/Document/pain.001.001.02/PmtInf/PmtMtd";
+        //String SUA_IDENTIFIER_xPATH = "/Document/pain.001.001.02/PmtInf/Dbtr/Nm";
 
         XMLEventWriter writer = null ;
         if(args.length < 1){
@@ -120,7 +121,7 @@ public class StaxParser {
                     writer.add(event);
                 }
                 if(isHeaderOpen) {
-                    System.out.println(formXPath(arrayList) + "-" + getEventTypeString(event.getEventType()));
+                   // System.out.println(formXPath(arrayList) + "-" + getEventTypeString(event.getEventType()));
                     writer.add(event);
                 }
                 if(isBatchStart){

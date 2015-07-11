@@ -1,7 +1,9 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Document xmlns="urn:iso:std:iso:20022:tech:xsd:pain.001.001.02" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<?xml version="1.0" encoding="UTF-8"?><Document xmlns="urn:iso:std:iso:20022:tech:xsd:pain.001.001.02" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<pain.001.001.02>
 		<GrpHdr>
 			<MsgId>ABC/060928/CCT001</MsgId>
 		</GrpHdr>
-		</pain.001.001.02>
+		<PmtInf>
+			<PmtMtd>CCRD</PmtMtd>
+			<ReqdExctnDt>2006-09-29</ReqdExctnDt>
+		</PmtInf>
