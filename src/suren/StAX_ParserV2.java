@@ -20,13 +20,10 @@ public class StAX_ParserV2 {
     public static String formXPath(Stack<String> stack) {
         Iterator<String> i = stack.iterator();
         String tempXpath = "";
-
         while (i.hasNext()) {
             String s = i.next();
             tempXpath = tempXpath.concat("/").concat(s);
         }
-
-        //////System.out.println(tempXpath);
         return tempXpath;
     }
 
@@ -77,21 +74,19 @@ public class StAX_ParserV2 {
         boolean isBatchOpen = false;
         boolean isSUAbatch = false;
         String BATCH_START_TAG_XPATH = "/Document/pain.001.001.02/PmtInf";
-        //String SUA_IDENTIFIER_xPATH = "/Document/pain.001.001.02/PmtInf/PmtMtd";
         String SUA_IDENTIFIER_xPATH = "/Document/pain.001.001.02/PmtInf/Dbtr/Nm";
 
         XMLEventWriter writer = null;
 
-        XMLEventReader reader = null;
         try {
-            reader = XMLInputFactory.newInstance().createXMLEventReader(new
+            XMLEventReader reader = XMLInputFactory.newInstance().createXMLEventReader(new
                     java.io.FileInputStream("/Users/suren/IdeaProjects/StAX_ISO/Resources/pain.001.001.02.xml"));
             writer = XMLOutputFactory.newInstance().createXMLEventWriter(
                     new FileWriter("/Users/suren/IdeaProjects/StAX_ISO/Resources/out1_v2.xml"));
 
             while (reader.hasNext()) {
-                XMLEvent event = (XMLEvent) reader.next();
 
+                XMLEvent event = (XMLEvent) reader.next();
                 if (event.isStartElement()) {
                     //*** Add the opening tag to the openTag Stack
                     openTags.push(event.asStartElement().getName().getLocalPart());
@@ -107,17 +102,16 @@ public class StAX_ParserV2 {
                             String catgryPurpCode = reader.peek().asCharacters().getData();
                             if (catgryPurpCode.equalsIgnoreCase("CCRD")) {
                                 isSUAbatch = true;
-                                for (int i = 0; i < preSUAbatchEventsArrayList.size(); i++) {
-                                    writer.add(preSUAbatchEventsArrayList.get(i));
+                                for (XMLEvent aPreSUAbatchEventsArrayList : preSUAbatchEventsArrayList) {
+                                    writer.add(aPreSUAbatchEventsArrayList);
                                 }
 
                                 //*** Reset the preSUAbatchevents
-                                preSUAbatchEventsArrayList.removeAll(preSUAbatchEventsArrayList);
+                                final boolean b = preSUAbatchEventsArrayList.removeAll(preSUAbatchEventsArrayList);
                             }
                         }
                     }
                 }
-
 
                 if (isHeaderOpen || isSUAbatch || !isBatchOpen) {
                     writer.add(event);
@@ -129,12 +123,10 @@ public class StAX_ParserV2 {
                     if (BATCH_START_TAG_XPATH.equalsIgnoreCase(formXPath(openTags))) {
                         isBatchOpen = false;
                         isSUAbatch = false;
-                        preSUAbatchEventsArrayList.removeAll(preSUAbatchEventsArrayList);
+                        preSUAbatchEventsArrayList.clear();
                     }
                     openTags.pop();
                 }
-
-
             }
 
             writer.flush();
