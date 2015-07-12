@@ -22,7 +22,6 @@ public class StAX_ParserV2 {
             String s = i.next();
             tempXpath = tempXpath.concat("/").concat(s);
         }
-        //System.out.println(tempXpath);
         return tempXpath;
     }
 
@@ -140,20 +139,13 @@ public class StAX_ParserV2 {
                     }
                 }
 
-                /*if (isHeaderOpen){
-                    headerArrayList.add(event);
-                }*/
-
                 if ((isSUAbatch || !isBatchOpen) && (!isHeaderOpen && isBatchOpen)) {
-                    //System.out.println(event +"-"+getEventTypeString(event.getEventType()));
                     batchWriter.add(event);
                 } else if (isBatchOpen && !isSUAbatch) {
                     preSUAbatchEventsArrayList.add(event);
                 } else if (!isTrailerStart) {
-                    ////System.out.println(event);
                     headerArrayList.add(event);
                 } else if (isTrailerStart) {
-                    System.out.println(event.toString());
                     trailerArrayList.add(event);
                 }
 
@@ -173,85 +165,12 @@ public class StAX_ParserV2 {
 
             batchWriter.flush();
 
-
-            //System.out.println(headerArrayList.size());
             FileWriter fileWriter =
                     new FileWriter("/Users/suren/IdeaProjects/StAX_ISO/Resources/out1_v2_header.xml");
             XMLEventWriter headerWriter = XMLOutputFactory.newInstance().createXMLEventWriter(fileWriter);
-
-            openTags.empty();
-          /*  System.out.println(openTags.size());
             for (int i = 0; i < headerArrayList.size(); i++) {
-
-                XMLEvent eve = headerArrayList.get(i);
-                String tagLocalpart = "";
-                String tempTag = "";
-                if(eve.isStartElement()){
-                    tagLocalpart = eve.asStartElement().getName().getLocalPart();
-                    tempTag = "<"+tagLocalpart+">";
-                    openTags.push(tagLocalpart);
-                }
-                else if(eve.isEndElement()) {
-                    *//*tagLocalpart = eve.asEndElement().getName().getLocalPart();
-                    tempTag = "</"+tagLocalpart+">";*//*
-                    openTags.pop();
-                }
-                System.out.println(tagLocalpart);
-
-                System.out.println(formXPath(openTags));
-                if(formXPath(openTags).equalsIgnoreCase(TRAILER_START_xPATH))
-                    isTrailerStart = true;
-
-                ////System.out.println(eve +"-"+getEventTypeString(eve.getEventType()));
-                if(!isTrailerStart)
-                    headerWriter.add(eve);
-                else{
-                    writer.write(tempTag);
-                }
-
-
-
-                *//*if(eve.isEndElement())
-                    writer.write("</"+eve.asEndElement().getName().getLocalPart()+">");*//*
-                *//*if (eve.isEndDocument())
-                    writer.write("</"+eve.asen.getName().getLocalPart()+">");*//*
-
-            }*/
-
-            for (int i = 0; i < headerArrayList.size(); i++) {
-
                 XMLEvent eve = headerArrayList.get(i);
                 headerWriter.add(eve);
-/*
-                if(eve.isStartElement()){
-                    String tagLocalpart = eve.asStartElement().getName().getLocalPart();
-                    openTags.push(tagLocalpart);
-                }
-                if(eve.isEndElement()) {
-                    */
-/*String tagLocalpart = eve.asEndElement().getName().getLocalPart();
-                    openTags.push(tagLocalpart);*//*
-
-
-                    if(formXPath(openTags).equalsIgnoreCase(TRAILER_START_xPATH)) {
-                        System.out.println(formXPath(openTags));
-                        headerWriter.add(eve);
-                        i++;
-                        isTrailerStart = true;
-                    }
-                    openTags.pop();
-
-                }
-
-                if(!isTrailerStart){
-                    headerWriter.add(eve);
-                } else {
-                    writer.write(eve.toString()+"-"+getEventTypeString(eve.getEventType())+"\n");
-                }
-
-*/
-
-
             }
 
 
@@ -268,8 +187,6 @@ public class StAX_ParserV2 {
             e.printStackTrace();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
-        } finally {
-            //batchWriter.flush();
         }
 
     }
