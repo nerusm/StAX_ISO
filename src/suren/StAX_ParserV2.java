@@ -2,9 +2,7 @@ package suren;
 
 import javax.xml.stream.*;
 import javax.xml.stream.events.XMLEvent;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -15,7 +13,7 @@ import java.util.Stack;
  */
 public class StAX_ParserV2 {
 
-    XMLEventFactory m_eventFactory = XMLEventFactory.newInstance();
+    //XMLEventFactory m_eventFactory = XMLEventFactory.newInstance();
 
     public static String formXPath(Stack<String> stack) {
         Iterator<String> i = stack.iterator();
@@ -24,9 +22,9 @@ public class StAX_ParserV2 {
             String s = i.next();
             tempXpath = tempXpath.concat("/").concat(s);
         }
+        //System.out.println(tempXpath);
         return tempXpath;
     }
-
 
     public static final String getEventTypeString(int eventType) {
         switch (eventType) {
@@ -67,22 +65,51 @@ public class StAX_ParserV2 {
         return "UNKNOWN_EVENT_TYPE";
     }
 
-    public static void main(String args[]) throws IOException {
+    public static String formTags(XMLEvent event) {
+        switch (event.getEventType()) {
+            case XMLEvent.START_ELEMENT:
+                return "<" + event.asStartElement().getName().getLocalPart() + ">";
+
+            case XMLEvent.END_ELEMENT:
+                return "</" + event.asEndElement().getName().getLocalPart() + ">";
+
+            case XMLEvent.PROCESSING_INSTRUCTION:
+                return "PROCESSING_INSTRUCTION";
+
+            case XMLEvent.CHARACTERS:
+                return event.asCharacters().getData();
+
+            case XMLEvent.END_DOCUMENT:
+                return "";
+
+            case XMLEvent.COMMENT:
+                return event.toString();
+
+
+        }
+        return null;
+    }
+
+    public static void main(String args[]) throws IOException, XMLStreamException {
         ArrayList<XMLEvent> preSUAbatchEventsArrayList = new ArrayList<>();
+        ArrayList<XMLEvent> headerArrayList = new ArrayList<XMLEvent>();
+        ArrayList<XMLEvent> trailerArrayList = new ArrayList<XMLEvent>();
         Stack<String> openTags = new Stack<String>();
         boolean isHeaderOpen = true;
         boolean isBatchOpen = false;
         boolean isSUAbatch = false;
+        boolean isTrailerStart = false;
         String BATCH_START_TAG_XPATH = "/Document/pain.001.001.02/PmtInf";
         String SUA_IDENTIFIER_xPATH = "/Document/pain.001.001.02/PmtInf/Dbtr/Nm";
+        String TRAILER_START_xPATH = "/Document/pain.001.001.02/GrpHdr";
 
-        XMLEventWriter writer = null;
+        XMLEventWriter batchWriter = null;
 
         try {
             XMLEventReader reader = XMLInputFactory.newInstance().createXMLEventReader(new
                     java.io.FileInputStream("/Users/suren/IdeaProjects/StAX_ISO/Resources/pain.001.001.02.xml"));
-            writer = XMLOutputFactory.newInstance().createXMLEventWriter(
-                    new FileWriter("/Users/suren/IdeaProjects/StAX_ISO/Resources/out1_v2.xml"));
+            batchWriter = XMLOutputFactory.newInstance().createXMLEventWriter(
+                    new FileWriter("/Users/suren/IdeaProjects/StAX_ISO/Resources/out1_v2_batches.xml"));
 
             while (reader.hasNext()) {
 
@@ -103,7 +130,7 @@ public class StAX_ParserV2 {
                             if (catgryPurpCode.equalsIgnoreCase("CCRD")) {
                                 isSUAbatch = true;
                                 for (XMLEvent aPreSUAbatchEventsArrayList : preSUAbatchEventsArrayList) {
-                                    writer.add(aPreSUAbatchEventsArrayList);
+                                    batchWriter.add(aPreSUAbatchEventsArrayList);
                                 }
 
                                 //*** Reset the preSUAbatchevents
@@ -113,10 +140,21 @@ public class StAX_ParserV2 {
                     }
                 }
 
-                if (isHeaderOpen || isSUAbatch || !isBatchOpen) {
-                    writer.add(event);
+                /*if (isHeaderOpen){
+                    headerArrayList.add(event);
+                }*/
+
+                if ((isSUAbatch || !isBatchOpen) && (!isHeaderOpen && isBatchOpen)) {
+                    //System.out.println(event +"-"+getEventTypeString(event.getEventType()));
+                    batchWriter.add(event);
                 } else if (isBatchOpen && !isSUAbatch) {
                     preSUAbatchEventsArrayList.add(event);
+                } else if (!isTrailerStart) {
+                    ////System.out.println(event);
+                    headerArrayList.add(event);
+                } else if (isTrailerStart) {
+                    System.out.println(event.toString());
+                    trailerArrayList.add(event);
                 }
 
                 if (event.isEndElement()) {
@@ -125,17 +163,113 @@ public class StAX_ParserV2 {
                         isSUAbatch = false;
                         preSUAbatchEventsArrayList.clear();
                     }
+                    if (TRAILER_START_xPATH.equalsIgnoreCase(formXPath(openTags))) {
+                        System.out.println("*************** Start of trailer");
+                        isTrailerStart = true;
+                    }
                     openTags.pop();
                 }
             }
 
-            writer.flush();
+            batchWriter.flush();
 
+
+            //System.out.println(headerArrayList.size());
+            FileWriter fileWriter =
+                    new FileWriter("/Users/suren/IdeaProjects/StAX_ISO/Resources/out1_v2_header.xml");
+            XMLEventWriter headerWriter = XMLOutputFactory.newInstance().createXMLEventWriter(fileWriter);
+
+            openTags.empty();
+          /*  System.out.println(openTags.size());
+            for (int i = 0; i < headerArrayList.size(); i++) {
+
+                XMLEvent eve = headerArrayList.get(i);
+                String tagLocalpart = "";
+                String tempTag = "";
+                if(eve.isStartElement()){
+                    tagLocalpart = eve.asStartElement().getName().getLocalPart();
+                    tempTag = "<"+tagLocalpart+">";
+                    openTags.push(tagLocalpart);
+                }
+                else if(eve.isEndElement()) {
+                    *//*tagLocalpart = eve.asEndElement().getName().getLocalPart();
+                    tempTag = "</"+tagLocalpart+">";*//*
+                    openTags.pop();
+                }
+                System.out.println(tagLocalpart);
+
+                System.out.println(formXPath(openTags));
+                if(formXPath(openTags).equalsIgnoreCase(TRAILER_START_xPATH))
+                    isTrailerStart = true;
+
+                ////System.out.println(eve +"-"+getEventTypeString(eve.getEventType()));
+                if(!isTrailerStart)
+                    headerWriter.add(eve);
+                else{
+                    writer.write(tempTag);
+                }
+
+
+
+                *//*if(eve.isEndElement())
+                    writer.write("</"+eve.asEndElement().getName().getLocalPart()+">");*//*
+                *//*if (eve.isEndDocument())
+                    writer.write("</"+eve.asen.getName().getLocalPart()+">");*//*
+
+            }*/
+
+            for (int i = 0; i < headerArrayList.size(); i++) {
+
+                XMLEvent eve = headerArrayList.get(i);
+                headerWriter.add(eve);
+/*
+                if(eve.isStartElement()){
+                    String tagLocalpart = eve.asStartElement().getName().getLocalPart();
+                    openTags.push(tagLocalpart);
+                }
+                if(eve.isEndElement()) {
+                    */
+/*String tagLocalpart = eve.asEndElement().getName().getLocalPart();
+                    openTags.push(tagLocalpart);*//*
+
+
+                    if(formXPath(openTags).equalsIgnoreCase(TRAILER_START_xPATH)) {
+                        System.out.println(formXPath(openTags));
+                        headerWriter.add(eve);
+                        i++;
+                        isTrailerStart = true;
+                    }
+                    openTags.pop();
+
+                }
+
+                if(!isTrailerStart){
+                    headerWriter.add(eve);
+                } else {
+                    writer.write(eve.toString()+"-"+getEventTypeString(eve.getEventType())+"\n");
+                }
+
+*/
+
+
+            }
+
+
+            Writer trailerWriter = new BufferedWriter(
+                    new FileWriter("/Users/suren/IdeaProjects/StAX_ISO/Resources/out1_v2_batches.xml", true));
+            for (int i = 0; i < trailerArrayList.size(); i++) {
+                trailerWriter.write(formTags(trailerArrayList.get(i)));
+            }
+
+            headerWriter.flush();
+            trailerWriter.flush();
 
         } catch (XMLStreamException e) {
             e.printStackTrace();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
+        } finally {
+            //batchWriter.flush();
         }
 
     }

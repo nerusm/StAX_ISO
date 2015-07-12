@@ -687,5 +687,6 @@
 				</RmtInf>
 			</CdtTrfTxInf>
 		</PmtInf>
+		<!-- this is a comment -->
 	</pain.001.001.02>
 </Document>
